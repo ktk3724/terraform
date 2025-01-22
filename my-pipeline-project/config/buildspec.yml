@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  # 빌드 전 단계
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
+  
+  # 빌드 단계
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+  
+  # 빌드 후 단계
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+
+# 빌드 결과물 설정
+artifacts:
+  files:
+    - '**/*'  # 모든 파일을 아티팩트로 포함
+    
